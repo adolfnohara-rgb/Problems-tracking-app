@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 
+const autoEscalateIssues = require("./utils/autoEscalation");
+
 dotenv.config();
 
 const app = express();
@@ -39,12 +41,25 @@ app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
+
+
+
 // mongo connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected");
+
+    // 🔁 Run auto escalation every 6 hours
+    setInterval(autoEscalateIssues, 6 * 60 * 60 * 1000);
+
+    // Optional: run once immediately on startup
+    autoEscalateIssues();
+
+
   })
+
+  
   .catch((err) => {
     console.error("MongoDB connection error:", err);
   });
